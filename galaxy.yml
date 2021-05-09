@@ -1,6 +1,6 @@
 namespace: masterlittle
 name: google
-version: 1.0.7
+version: 1.0.8
 readme: README.md
 authors:
   - Ansible (https://github.com/ansible)

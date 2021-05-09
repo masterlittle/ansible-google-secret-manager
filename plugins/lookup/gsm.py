@@ -7,6 +7,8 @@ __metaclass__ = type
 
 import logging
 
+from google.auth.credentials import Credentials
+
 DOCUMENTATION = r'''
 lookup: aws_secret
 author:
@@ -101,12 +103,13 @@ from ansible.plugins.lookup import LookupBase
 
 
 class LookupModule(LookupBase):
-    def run(self, terms, project_id, variables=None, nested=False, join=False, version_id="latest", on_missing='error',
+    def run(self, terms, project_id, credential_file=None, variables=None, nested=False, join=False, version_id="latest", on_missing='error',
             on_denied='error'):
         '''
                    :arg project_id: The project in which the secrets reside
                    terms: a list of lookups to run.
                        e.g. ['parameter_name', 'parameter_name_too' ]
+                   :kwarg credential_file: full file path of a service account file
                    :kwarg variables: ansible variables active at the time of the lookup
                    :kwarg nested: Set to True to do a lookup of nested secrets
                    :kwarg join: Join two or more entries to form an extended secret
@@ -123,7 +126,10 @@ class LookupModule(LookupBase):
         if not isinstance(denied, string_types) or denied not in ['error', 'warn', 'skip']:
             raise AnsibleError('"on_denied" must be a string and one of "error", "warn" or "skip", not %s' % denied)
 
-        client = secretmanager.SecretManagerServiceClient()
+        if credential_file:
+            client = secretmanager.SecretManagerServiceClient.from_service_account_file(credential_file)
+        else:
+            client = secretmanager.SecretManagerServiceClient()
 
         secrets = []
         for term in terms:
