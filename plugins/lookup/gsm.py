@@ -9,45 +9,34 @@ __metaclass__ = type
 DOCUMENTATION = r'''
 lookup: aws_secret
 author:
-  - Aaron Smith <ajsmith10381@gmail.com>
+  - Shitij Goyal<goyalshitij@gmail.com>
 requirements:
-  - boto3
-  - botocore>=1.10.0
-extends_documentation_fragment:
-- amazon.aws.aws_credentials
-- amazon.aws.aws_region
+  - google-cloud-secret-manager==2.4.0
 
-short_description: Look up secrets stored in AWS Secrets Manager.
+short_description: Look up secrets stored in Google Secrets Manager.
 description:
-  - Look up secrets stored in AWS Secrets Manager provided the caller
+  - Look up secrets stored in Google Secrets Manager provided the caller
     has the appropriate permissions to read the secret.
   - Lookup is based on the secret's I(Name) value.
-  - Optional parameters can be passed into this lookup; I(version_id) and I(version_stage)
+  - Optional parameters can be passed into this lookup; I(version_id)
 options:
   _terms:
-    description: Name of the secret to look up in AWS Secrets Manager.
+    description: Name of the secret to look up in Google Secrets Manager.
     required: True
-  bypath:
-    description: A boolean to indicate whether the parameter is provided as a hierarchy.
-    default: false
-    type: boolean
-    version_added: 1.4.0
+  project_id:
+    description: The project ID in which the secrets reside
+    required: True
   nested:
     description: A boolean to indicate the secret contains nested values.
     type: boolean
     default: false
-    version_added: 1.4.0
+    version_added: 1.0.0
   version_id:
     description: Version of the secret(s).
-    required: False
-  version_stage:
-    description: Stage of the secret version.
     required: False
   join:
     description:
         - Join two or more entries to form an extended secret.
-        - This is useful for overcoming the 4096 character limit imposed by AWS.
-        - No effect when used with I(bypath).
     type: boolean
     default: false
   on_missing:
@@ -72,36 +61,24 @@ options:
 
 EXAMPLES = r"""
  - name: lookup secretsmanager secret in the current region
-   debug: msg="{{ lookup('amazon.aws.aws_secret', '/path/to/secrets', bypath=true) }}"
-
- - name: Create RDS instance with aws_secret lookup for password param
-   rds:
-     command: create
-     instance_name: app-db
-     db_engine: MySQL
-     size: 10
-     instance_type: db.m1.small
-     username: dbadmin
-     password: "{{ lookup('amazon.aws.aws_secret', 'DbSecret') }}"
-     tags:
-       Environment: staging
+   debug: msg="{{ lookup('masterlittle.google.gsm', 'project-id','/path/to/secrets') }}"
 
  - name: skip if secret does not exist
-   debug: msg="{{ lookup('amazon.aws.aws_secret', 'secret-not-exist', on_missing='skip')}}"
+   debug: msg="{{ lookup('masterlittle.google.gsm', , 'project-id', 'secret-not-exist', on_missing='skip')}}"
 
  - name: warn if access to the secret is denied
-   debug: msg="{{ lookup('amazon.aws.aws_secret', 'secret-denied', on_denied='warn')}}"
+   debug: msg="{{ lookup('masterlittle.google.gsm', , 'project-id', 'secret-denied', on_denied='warn')}}"
 
  - name: lookup secretsmanager secret in the current region using the nested feature
-   debug: msg="{{ lookup('amazon.aws.aws_secret', 'secrets.environments.production.password', nested=true) }}"
-   # The secret can be queried using the following syntax: `aws_secret_object_name.key1.key2.key3`.
+   debug: msg="{{ lookup('masterlittle.google.gsm', 'project-id', 'secrets.environments.production.password', nested=true) }}"
+   # The secret can be queried using the following syntax: `google_secret_object_name.key1.key2.key3`.
    # If an object is of the form `{"key1":{"key2":{"key3":1}}}` the query would return the value `1`.
 """
 
 RETURN = r"""
 _raw:
   description:
-    Returns the value of the secret stored in AWS Secrets Manager.
+    Returns the value of the secret stored in Google Secrets Manager.
 """
 
 import json
@@ -126,18 +103,12 @@ class LookupModule(LookupBase):
     def run(self, project_id, terms, variables=None, nested=False, join=False, version_id="latest", on_missing='error',
             on_denied='error'):
         '''
-                   :arg terms: a list of lookups to run.
+                   :arg project_id: The project in which the secrets reside
+                   terms: a list of lookups to run.
                        e.g. ['parameter_name', 'parameter_name_too' ]
                    :kwarg variables: ansible variables active at the time of the lookup
-                   :kwarg aws_secret_key: identity of the AWS key to use
-                   :kwarg aws_access_key: AWS secret key (matching identity)
-                   :kwarg aws_security_token: AWS session key if using STS
-                   :kwarg decrypt: Set to True to get decrypted parameters
-                   :kwarg region: AWS region in which to do the lookup
-                   :kwarg bypath: Set to True to do a lookup of variables under a path
                    :kwarg nested: Set to True to do a lookup of nested secrets
                    :kwarg join: Join two or more entries to form an extended secret
-                   :kwarg version_stage: Stage of the secret version
                    :kwarg version_id: Version of the secret(s)
                    :kwarg on_missing: Action to take if the secret is missing
                    :kwarg on_denied: Action to take if access to the secret is denied
