@@ -1,0 +1,13 @@
+namespace: masterlittle
+name: gsm
+version: 1.0.0
+readme: README.md
+authors:
+  - Ansible (https://github.com/ansible)
+description: null
+license_file: COPYING
+tags: [cloud, google, security, secrets]
+repository: https://github.com/masterlittle/ansible-google-secret-manager
+homepage: https://github.com/masterlittle/ansible-google-secret-manager
+build_ignore:
+  - 'changelogs/.plugin-cache.yaml'
