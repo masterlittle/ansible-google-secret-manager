@@ -5,6 +5,7 @@ from __future__ import (absolute_import, division, print_function)
 
 __metaclass__ = type
 
+import logging
 
 DOCUMENTATION = r'''
 lookup: aws_secret
@@ -61,16 +62,16 @@ options:
 
 EXAMPLES = r"""
  - name: lookup secretsmanager secret in the current region
-   debug: msg="{{ lookup('masterlittle.google.gsm', 'project-id','/path/to/secrets') }}"
+   debug: msg="{{ lookup('masterlittle.google.gsm','/path/to/secrets', project_id='project-id') }}"
 
  - name: skip if secret does not exist
-   debug: msg="{{ lookup('masterlittle.google.gsm', , 'project-id', 'secret-not-exist', on_missing='skip')}}"
+   debug: msg="{{ lookup('masterlittle.google.gsm', 'secret-not-exist', project_id='project-id', on_missing='skip')}}"
 
  - name: warn if access to the secret is denied
-   debug: msg="{{ lookup('masterlittle.google.gsm', , 'project-id', 'secret-denied', on_denied='warn')}}"
+   debug: msg="{{ lookup('masterlittle.google.gsm', 'secret-denied', project_id='project-id', on_denied='warn')}}"
 
  - name: lookup secretsmanager secret in the current region using the nested feature
-   debug: msg="{{ lookup('masterlittle.google.gsm', 'project-id', 'secrets.environments.production.password', nested=true) }}"
+   debug: msg="{{ lookup('masterlittle.google.gsm', 'secrets.environments.production.password', project_id='project-id', nested=true) }}"
    # The secret can be queried using the following syntax: `google_secret_object_name.key1.key2.key3`.
    # If an object is of the form `{"key1":{"key2":{"key3":1}}}` the query would return the value `1`.
 """
@@ -100,7 +101,7 @@ from ansible.plugins.lookup import LookupBase
 
 
 class LookupModule(LookupBase):
-    def run(self, project_id, terms, variables=None, nested=False, join=False, version_id="latest", on_missing='error',
+    def run(self, terms, project_id, variables=None, nested=False, join=False, version_id="latest", on_missing='error',
             on_denied='error'):
         '''
                    :arg project_id: The project in which the secrets reside
