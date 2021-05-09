@@ -1,5 +1,5 @@
-namespace: masterlittle
-name: gsm
+namespace: community
+name: google_secret_manager
 version: 1.0.0
 readme: README.md
 authors:
@@ -10,4 +10,4 @@ tags: [cloud, google, security, secrets]
 repository: https://github.com/masterlittle/ansible-google-secret-manager
 homepage: https://github.com/masterlittle/ansible-google-secret-manager
 build_ignore:
-  - 'changelogs/.plugin-cache.yaml'
+  - 'venv/'
