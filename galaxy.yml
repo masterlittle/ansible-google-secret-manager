@@ -1,4 +1,4 @@
-namespace: community
+namespace: masterlittle
 name: google_secret_manager
 version: 1.0.0
 readme: README.md
@@ -7,7 +7,7 @@ authors:
 description: null
 license_file: COPYING
 tags: [cloud, google, security, secrets]
-repository: https://github.com/masterlittle/ansible-google-secret-manager
-homepage: https://github.com/masterlittle/ansible-google-secret-manager
+repository: https://github.com/masterlittle/ansible_google-secret-manager
+homepage: https://github.com/masterlittle/ansible_google-secret-manager
 build_ignore:
   - 'venv/'
